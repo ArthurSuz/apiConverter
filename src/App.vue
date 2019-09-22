@@ -3,7 +3,7 @@
         <el-container>
             <el-header class="header">API-Converter</el-header>
             <el-main>
-                <Home />
+                <Home class="home" />
             </el-main>
         </el-container>
     </div>
@@ -22,6 +22,7 @@ export default {
 
 <style lang="less" scoped>
 #app {
+    min-width: 300px;
     .header {
         display: flex;
         align-items: center;
