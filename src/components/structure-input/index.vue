@@ -25,37 +25,8 @@
 </template>
 
 <script>
-const NestNum = 10; //嵌套层数
-const basisTypes = {
-    Int: `0`,
-    Date: `"2019-09-21"`,
-    String: `"test"`,
-    "List<int>": `[1, 2, 3, 4, 5]`,
-    "List<string>": `["a", "b", "c", "d", "e"]`,
-    timestamp: `1569054307819`
-};
-const complexTypes = {
-    "List<Obj>": `[{}]`,
-    Obj: `{}`
-};
-const responeType = "Obj";
-const template = {
-    name: "respone",
-    data: [
-        {
-            input: "code",
-            type: "Int"
-        },
-        {
-            input: "message",
-            type: "String"
-        },
-        {
-            input: "data",
-            type: "Obj"
-        }
-    ]
-};
+import config from "./config";
+
 export default {
     name: "structure-input",
     data() {
@@ -74,7 +45,7 @@ export default {
                     }
                 ]
             },
-            types: { ...basisTypes, ...complexTypes },
+            types: { ...config.basisTypes, ...config.complexTypes },
             backLists: []
         };
     },
@@ -85,7 +56,10 @@ export default {
                     this.$emit(
                         "setJson",
                         JSON.parse(
-                            this.transform(this.backLists[0].data, responeType)
+                            this.transform(
+                                this.backLists[0].data,
+                                config.responeType
+                            )
                         )
                     );
                 }
@@ -96,10 +70,10 @@ export default {
     },
     mounted() {
         this.options = [
-            ...Object.keys(basisTypes),
-            ...Object.keys(complexTypes)
+            ...Object.keys(config.basisTypes),
+            ...Object.keys(config.complexTypes)
         ];
-        this.backLists.push(template);
+        this.backLists.push(config.template);
     },
     methods: {
         addValue(index) {
@@ -122,7 +96,7 @@ export default {
             return JSON.parse(JSON.stringify(obj));
         },
         transform(data, type, index = 0) {
-            if (index > NestNum) {
+            if (index > config.NestNum) {
                 this.$message.error(`嵌套最多${index}层, 请勿循环嵌套`);
                 return;
             }
@@ -132,9 +106,11 @@ export default {
             let str = "";
             data.forEach(item => {
                 if (item.input) {
-                    if (Object.keys(basisTypes).includes(item.type)) {
+                    if (Object.keys(config.basisTypes).includes(item.type)) {
                         str += `"${item.input}":${this.types[item.type]},`;
-                    } else if (Object.keys(complexTypes).includes(item.type)) {
+                    } else if (
+                        Object.keys(config.complexTypes).includes(item.type)
+                    ) {
                         index++;
                         let childStr = this.transform(
                             this.findInList(item.input, index),
