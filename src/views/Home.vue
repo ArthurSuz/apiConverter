@@ -24,12 +24,13 @@
 
 <script>
 import VueJsonPretty from "vue-json-pretty";
+const NestNum = 10;//嵌套层数
 const basisTypes = {
     Int: `0`,
     Date: `"2019-09-21"`,
     String: `"test"`,
-    "Arr<int>": `[1, 2, 3, 4, 5]`,
-    "Arr<string>": `["a", "b", "c", "d", "e"]`,
+    "List<int>": `[1, 2, 3, 4, 5]`,
+    "List<string>": `["a", "b", "c", "d", "e"]`,
     timestamp: `1569054307819`
 };
 const complexTypes = {
@@ -107,7 +108,7 @@ export default {
             return JSON.parse(JSON.stringify(obj));
         },
         transform(data, type, index = 0) {
-            if (index > 3) {
+            if (index > NestNum) {
                 this.$message.error(`嵌套最多${index}层, 请勿循环嵌套`);
                 return;
             }
