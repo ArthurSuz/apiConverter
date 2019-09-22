@@ -2,38 +2,36 @@
     <div id="home">
         <el-card class="pane back">
             <div class="backLists" v-for="(backList,index) in backLists" :key="index">
-                <el-input v-model="backList.name" @change="change">
-                    <template slot="prepend">结构名</template>
-                </el-input>
-                <div class="value" v-for="(item,index) in backList.data" :key="index">
-                    <el-input v-model="item.input" @change="change" placeholder="字段"></el-input>
-                    <el-select v-model="item.type" @change="change" placeholder="数据类型">
+                <div class="backList-name">
+                    <el-input v-model="backList.name">
+                        <template slot="prepend">结构名</template>
+                    </el-input>
+                    <el-button icon="el-icon-delete-solid" v-if="index!==0" @click="delList(index)"></el-button>
+                </div>
+                <div class="value" v-for="(item,itemIndex) in backList.data" :key="itemIndex">
+                    <el-input v-model="item.input" placeholder="字段名"></el-input>
+                    <el-select v-model="item.type" placeholder="数据类型">
                         <el-option v-for="option in options" :key="option" :value="option"></el-option>
                     </el-select>
+                    <el-button
+                        class="del-btn"
+                        icon="el-icon-delete"
+                        @click="delValue(index,itemIndex)"
+                    ></el-button>
                 </div>
-                <el-button class="add-value" @click="addValue(index)">添加字段+</el-button>
+                <el-button class="add-value" icon="el-icon-circle-plus-outline" @click="addValue(index)">添加字段</el-button>
             </div>
-            <el-button class="add-value" @click="addList">添加结构+</el-button>
+            <el-button class="add-value" icon="el-icon-circle-plus" @click="addList">添加结构</el-button>
         </el-card>
         <el-card class="pane front">
             <div class="config">
-                <div>
-                    <label>折叠层数:</label>
-                    <el-input-number
-                        v-model="deep"
-                        controls-position="right"
-                        :min="1"
-                        :max="10"
-                        size="small"
-                    ></el-input-number>
-                </div>
                 <el-switch v-model="showDoubleQuotes" active-text="标准JOSN" inactive-text="去双引号"></el-switch>
             </div>
             <vue-json-pretty
                 :showDoubleQuotes="showDoubleQuotes"
                 :highlightMouseoverNode="true"
                 :showLength="true"
-                :deep="deep"
+                :deep="3"
                 :data="jsonText"
             ></vue-json-pretty>
         </el-card>
@@ -98,8 +96,20 @@ export default {
             backLists: [],
             jsonText: "",
             showDoubleQuotes: true,
-            deep: 3
         };
+    },
+    watch: {
+        backLists: {
+            handler(newValue, oldValue) {
+                if (this.backLists[0]) {
+                    this.jsonText = JSON.parse(
+                        this.transform(this.backLists[0].data, responeType)
+                    );
+                }
+            },
+            immediate: true,
+            deep: true
+        }
     },
     mounted() {
         this.options = [
@@ -107,21 +117,23 @@ export default {
             ...Object.keys(complexTypes)
         ];
         this.backLists.push(template);
-        this.change();
     },
     methods: {
-        change() {
-            if (this.backLists[0]) {
-                this.jsonText = JSON.parse(
-                    this.transform(this.backLists[0].data, responeType)
-                );
-            }
-        },
         addValue(index) {
             this.backLists[index].data.push(this.newOBJ(this.backListItem));
         },
+        delValue(index, itemIndex) {
+            if (index === 0 && this.backLists[index].data.length === 1) {
+                this.$message.error("首个结构至少保留一个参数");
+                return;
+            }
+            this.backLists[index].data.splice(itemIndex, 1);
+        },
         addList() {
             this.backLists.push(this.newOBJ(this.backListsItem));
+        },
+        delList(index) {
+            this.backLists.splice(index, 1);
         },
         newOBJ(obj) {
             return JSON.parse(JSON.stringify(obj));
@@ -156,7 +168,7 @@ export default {
                     str = str ? `{${str}}` : "";
                     break;
                 case "List<Obj>":
-                    str = str ? `[{${str}},{${str}},{${str}}]` : "";
+                    str = str ? `[{${str}}]` : "";
                     break;
             }
             return str.replace(/,}/g, "}");
@@ -188,16 +200,21 @@ export default {
             width: 100%;
         }
         .backLists {
+            display: flex;
+            flex-direction: column;
             margin-bottom: 20px;
             border: 1px #909399 solid;
             border-radius: 5px;
+        }
+        .backList-name {
+            display: flex;
         }
     }
     .front {
         .config {
             display: flex;
             align-items: center;
-            justify-content: space-around;
+            justify-content: flex-end;
         }
     }
 }
