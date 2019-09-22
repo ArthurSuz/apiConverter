@@ -16,15 +16,33 @@
             <el-button class="add-value" @click="addList">添加结构+</el-button>
         </el-card>
         <el-card class="pane front">
-            <el-button @click="changeJson" size="small">{{showDoubleQuotes?`切换Vue Data`:`切换标准JOSN`}}</el-button>
-            <vue-json-pretty :showDoubleQuotes="showDoubleQuotes" :data="jsonText"></vue-json-pretty>
+            <div class="config">
+                <div>
+                    <label>折叠层数:</label>
+                    <el-input-number
+                        v-model="deep"
+                        controls-position="right"
+                        :min="1"
+                        :max="10"
+                        size="small"
+                    ></el-input-number>
+                </div>
+                <el-switch v-model="showDoubleQuotes" active-text="标准JOSN" inactive-text="去双引号"></el-switch>
+            </div>
+            <vue-json-pretty
+                :showDoubleQuotes="showDoubleQuotes"
+                :highlightMouseoverNode="true"
+                :showLength="true"
+                :deep="deep"
+                :data="jsonText"
+            ></vue-json-pretty>
         </el-card>
     </div>
 </template>
 
 <script>
 import VueJsonPretty from "vue-json-pretty";
-const NestNum = 10;//嵌套层数
+const NestNum = 10; //嵌套层数
 const basisTypes = {
     Int: `0`,
     Date: `"2019-09-21"`,
@@ -79,7 +97,8 @@ export default {
             types: { ...basisTypes, ...complexTypes },
             backLists: [],
             jsonText: "",
-            showDoubleQuotes: true
+            showDoubleQuotes: true,
+            deep: 3
         };
     },
     mounted() {
@@ -147,9 +166,6 @@ export default {
                 return item.name === name;
             });
             return res && res.data;
-        },
-        changeJson() {
-            this.showDoubleQuotes = !this.showDoubleQuotes;
         }
     }
 };
@@ -175,6 +191,13 @@ export default {
             margin-bottom: 20px;
             border: 1px #909399 solid;
             border-radius: 5px;
+        }
+    }
+    .front {
+        .config {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
         }
     }
 }
