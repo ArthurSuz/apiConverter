@@ -1,7 +1,7 @@
 <template>
     <div id="data-produce">
         <el-collapse v-model="activeName" accordion>
-            <el-collapse-item title="Table For EXCEL" name="1">
+            <el-collapse-item title="Table(from Basic) For EXCEL" name="1">
                 <el-button
                     class="export-btn"
                     type="info"
