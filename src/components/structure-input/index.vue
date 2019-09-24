@@ -136,10 +136,10 @@ export default {
                 }
             });
             switch (type) {
-                case "Obj":
+                case "Object":
                     str = str ? `{${str}}` : "";
                     break;
-                case "List<Obj>":
+                case "List<obj>":
                     str = str ? `[{${str}},{${str}},{${str}}]` : "";
                     break;
             }

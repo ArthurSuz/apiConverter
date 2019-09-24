@@ -14,7 +14,7 @@ export default {
         "List<obj>": `[{}]`,
         Object: `{}`
     },//组合数据类型样例
-    responeType: "Obj",//接口返回类型
+    responeType: "Object",//接口返回类型
     template: {
         name: "respone",
         data: [
@@ -30,7 +30,7 @@ export default {
             },
             {
                 input: "data",
-                type: "Obj",
+                type: "Object",
                 child: "",
             }
         ]
