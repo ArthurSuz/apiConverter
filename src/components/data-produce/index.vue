@@ -11,6 +11,8 @@
                 <el-table :data="tableLists" border>
                     <el-table-column prop="name" label="字段名称"></el-table-column>
                     <el-table-column prop="type" label="类型"></el-table-column>
+                    <el-table-column prop="need" label="必填"></el-table-column>
+                    <el-table-column prop="remark" label="备注"></el-table-column>
                 </el-table>
             </el-collapse-item>
             <el-collapse-item title="YAPI" name="2">
@@ -46,7 +48,7 @@ export default {
             import("@/excel/Export2Excel").then(excel => {
                 this.exportLoading = false;
                 excel.export_json_to_excel({
-                    header: ["字段名称", "类型"],
+                    header: ["字段名称", "类型", "必填", "备注"],
                     data,
                     filename: "excel-list",
                     autoWidth: true,

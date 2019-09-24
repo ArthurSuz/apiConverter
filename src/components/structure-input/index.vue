@@ -8,24 +8,45 @@
                 <el-button icon="el-icon-delete-solid" v-if="index!==0" @click="delList(index)"></el-button>
             </div>
             <div class="value" v-for="(item,itemIndex) in backList.data" :key="itemIndex">
-                <el-input class="value-input" v-model="item.input" placeholder="字段名"></el-input>
-                <el-select
-                    class="value-type"
-                    v-model="item.type"
-                    @change="typeChange(index,itemIndex)"
-                    filterable
-                    allow-create
-                    placeholder="数据类型"
-                >
-                    <el-option v-for="option in options" :key="option" :value="option"></el-option>
-                </el-select>
-                <el-input
-                    class="value-child"
-                    v-model="item.child"
-                    v-if="Object.keys(config.complexTypes).includes(item.type)"
-                    placeholder="子结构名"
-                ></el-input>
-                <el-button class="del-btn" icon="el-icon-delete" @click="delValue(index,itemIndex)"></el-button>
+                <div class="value-main">
+                    <el-input class="value-input" v-model="item.input" placeholder="字段名"></el-input>
+                    <el-select
+                        class="value-type"
+                        v-model="item.type"
+                        @change="typeChange(index,itemIndex)"
+                        filterable
+                        allow-create
+                        placeholder="数据类型"
+                    >
+                        <el-option v-for="option in options" :key="option" :value="option"></el-option>
+                    </el-select>
+                    <el-input
+                        class="value-child"
+                        v-model="item.child"
+                        v-if="Object.keys(config.complexTypes).includes(item.type)"
+                        placeholder="子结构名"
+                    ></el-input>
+                    <el-button-group>
+                        <el-button
+                            icon="el-icon-setting"
+                            v-if="!showArr.includes(`${index}-${itemIndex}`)"
+                            @click="showConfig(index,itemIndex)"
+                        ></el-button>
+                        <el-button
+                            icon="el-icon-arrow-up"
+                            v-else
+                            @click="hiddenConfig(index,itemIndex)"
+                        ></el-button>
+                        <el-button icon="el-icon-delete" @click="delValue(index,itemIndex)"></el-button>
+                    </el-button-group>
+                </div>
+                <div class="value-config" v-if="showArr.includes(`${index}-${itemIndex}`)">
+                    <el-select v-model="item.need" placeholder="请选择">
+                        <el-option label="必须" value="true"></el-option>
+                        <el-option label="非必须" value="false"></el-option>
+                    </el-select>
+                    <el-input v-model="item.remark" placeholder="备注"></el-input>
+                </div>
             </div>
             <el-button
                 class="add-value"
@@ -49,7 +70,9 @@ export default {
             backListItem: {
                 input: "",
                 type: "",
-                child: ""
+                child: "",
+                need: true,
+                remark: ""
             },
             backListsItem: {
                 name: "data",
@@ -57,12 +80,15 @@ export default {
                     {
                         input: "",
                         type: "",
-                        child: ""
+                        child: "",
+                        need: true,
+                        remark: ""
                     }
                 ]
             },
             types: { ...config.basisTypes, ...config.complexTypes },
-            backLists: []
+            backLists: [],
+            showArr: []
         };
     },
     watch: {
@@ -98,6 +124,14 @@ export default {
                 return;
             }
             this.backLists[index].data.splice(itemIndex, 1);
+        },
+        showConfig(index, itemIndex) {
+            this.showArr.push(`${index}-${itemIndex}`);
+        },
+        hiddenConfig(index, itemIndex) {
+            this.showArr = this.showArr.filter(item => {
+                return item !== `${index}-${itemIndex}`;
+            });
         },
         addList() {
             this.backLists.push(this.newOBJ(this.backListsItem));
@@ -159,7 +193,7 @@ export default {
         setTable() {
             let arr = [];
             this.backLists.forEach(list => {
-                arr.push({ name: list.name, type: "" });
+                arr.push({ name: list.name, type: "", need: "", remark: "" });
                 list.data.forEach(item => {
                     let type;
                     switch (item.type) {
@@ -172,7 +206,12 @@ export default {
                         default:
                             type = item.type;
                     }
-                    arr.push({ name: item.input, type });
+                    arr.push({
+                        name: item.input,
+                        type,
+                        need: item.need,
+                        remark: item.remark
+                    });
                 });
             });
             return arr;
@@ -187,15 +226,28 @@ export default {
     flex-direction: column;
     .value {
         display: flex;
-        border-radius: 5px;
-        .value-input {
-            flex: 2;
+        flex-direction: column;
+        .value-main {
+            display: flex;
+            .value-input {
+                flex: 2;
+            }
+            .value-type {
+                flex: 1;
+            }
+            .value-child {
+                flex: 1;
+            }
         }
-        .value-type {
-            flex: 1;
-        }
-        .value-child {
-            flex: 1;
+        .value-config {
+            display: flex;
+            &::before {
+                content: "⌊";
+                padding: 0 5px 0 10px;
+                font-size: 20px;
+                font-weight: bold;
+                color: #c0c4cc;
+            }
         }
     }
     .add-value {
