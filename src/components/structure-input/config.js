@@ -2,16 +2,17 @@ export default {
     NestNum: 10, //最大嵌套层数
     basisTypes: {
         Int: `0`,
-        Int64: `123456`,
+        Float: `12.34`,
+        Boolean: `true`,
         Date: `"2019-09-21"`,
         String: `"testString"`,
         timestamp: `1569054307819`,
         "List<int>": `[1, 2, 3, 4, 5]`,
-        "List<string>": `["a", "b", "c", "d", "e"]`
+        "List<str>": `["a", "b", "c", "d", "e"]`
     },//基础数据类型样例
     complexTypes: {
-        "List<Obj>": `[{}]`,
-        Obj: `{}`
+        "List<obj>": `[{}]`,
+        Object: `{}`
     },//组合数据类型样例
     responeType: "Obj",//接口返回类型
     template: {

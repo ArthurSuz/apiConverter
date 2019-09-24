@@ -140,7 +140,7 @@ export default {
                     str = str ? `{${str}}` : "";
                     break;
                 case "List<Obj>":
-                    str = str ? `[{${str}}]` : "";
+                    str = str ? `[{${str}},{${str}},{${str}}]` : "";
                     break;
             }
             return str.replace(/,}/g, "}");
