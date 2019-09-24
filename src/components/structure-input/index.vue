@@ -8,10 +8,21 @@
                 <el-button icon="el-icon-delete-solid" v-if="index!==0" @click="delList(index)"></el-button>
             </div>
             <div class="value" v-for="(item,itemIndex) in backList.data" :key="itemIndex">
-                <el-input v-model="item.input" placeholder="字段名"></el-input>
-                <el-select v-model="item.type" placeholder="数据类型">
+                <el-input class="value-input" v-model="item.input" placeholder="字段名"></el-input>
+                <el-select
+                    class="value-type"
+                    v-model="item.type"
+                    @change="typeChange(index,itemIndex)"
+                    placeholder="数据类型"
+                >
                     <el-option v-for="option in options" :key="option" :value="option"></el-option>
                 </el-select>
+                <el-input
+                    class="value-child"
+                    v-model="item.child"
+                    v-if="Object.keys(config.complexTypes).includes(item.type)"
+                    placeholder="子结构名"
+                ></el-input>
                 <el-button class="del-btn" icon="el-icon-delete" @click="delValue(index,itemIndex)"></el-button>
             </div>
             <el-button
@@ -31,17 +42,20 @@ export default {
     name: "structure-input",
     data() {
         return {
+            config,
             options: [],
             backListItem: {
                 input: "",
-                type: ""
+                type: "",
+                child: ""
             },
             backListsItem: {
                 name: "data",
                 data: [
                     {
                         input: "",
-                        type: ""
+                        type: "",
+                        child: ""
                     }
                 ]
             },
@@ -52,17 +66,13 @@ export default {
     watch: {
         backLists: {
             handler(newValue, oldValue) {
-                if (this.backLists[0]) {
-                    this.$emit(
-                        "setJson",
-                        JSON.parse(
-                            this.transform(
-                                this.backLists[0].data,
-                                config.responeType
-                            )
-                        )
-                    );
+                if (!this.backLists[0]) {
+                    return;
                 }
+                let data = JSON.parse(
+                    this.transform(this.backLists[0].data, config.responeType)
+                );
+                this.$emit("setJson", data);
             },
             immediate: true,
             deep: true
@@ -92,6 +102,9 @@ export default {
         delList(index) {
             this.backLists.splice(index, 1);
         },
+        typeChange(index, itemIndex) {
+            this.backLists[index].data[itemIndex].child = "";
+        },
         newOBJ(obj) {
             return JSON.parse(JSON.stringify(obj));
         },
@@ -113,7 +126,7 @@ export default {
                     ) {
                         index++;
                         let childStr = this.transform(
-                            this.findInList(item.input, index),
+                            this.findInList(item.child, index),
                             item.type,
                             index
                         );
@@ -148,6 +161,16 @@ export default {
     flex-direction: column;
     .value {
         display: flex;
+        border-radius: 5px;
+        .value-input {
+            flex: 2;
+        }
+        .value-type {
+            flex: 1;
+        }
+        .value-child {
+            flex: 1;
+        }
     }
     .add-value {
         width: 100%;
