@@ -1,17 +1,17 @@
 <template>
-    <div id="json-show">
+    <div id="json-edit">
         <div class="btn-group">
             <div>
-                <el-button-group v-if="stepActive===1">
+                <el-button-group v-if="stepActive===2">
                     <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">上一步</el-button>
                 </el-button-group>
             </div>
             <div>
-                <el-button-group v-if="stepActive===0">
+                <el-button-group v-if="stepActive===1">
                     <el-button
                         size="mini"
                         v-clipboard:error="onError"
-                        v-clipboard:copy="copyText"
+                        v-clipboard:copy="JSON.stringify(showText, null, 2)"
                         v-clipboard:success="onCopy"
                         icon="el-icon-copy-document"
                     >复制</el-button>
@@ -22,42 +22,49 @@
                 </el-button-group>
             </div>
         </div>
+        <el-alert
+            v-show="showWarning"
+            title="非标准JSON时，视图不更新"
+            type="warning"
+            :closable="false"
+            show-icon
+            center
+        ></el-alert>
         <vue-json-pretty
             :highlightMouseoverNode="true"
             :showLength="true"
             :deep="3"
             :data="jsonText"
-            v-if="!showEditPane"
         ></vue-json-pretty>
-        <el-input type="textarea" autosize v-model="editText" v-else></el-input>
     </div>
 </template>
 
 <script>
 import VueJsonPretty from "vue-json-pretty";
+
 export default {
-    name: "json-show",
+    name: "json-edit",
     components: {
         VueJsonPretty
     },
-    props: ["jsonText", "stepActive"],
-    computed: {
-        copyText: function() {
-            return this.showEditPane
-                ? this.editText
-                : JSON.stringify(this.jsonText, null, 2);
-        }
-    },
-    watch: {
-        copyText: function(newValue, oldValue) {
-            this.$emit("setText", newValue);
-        }
-    },
+    props: ["jsonData", "stepActive"],
     data() {
         return {
-            showEditPane: false,
-            editText: ""
+            showText: {},
+            showWarning: false
         };
+    },
+    computed: {
+        jsonText() {
+            try {
+                this.showText = JSON.parse(this.jsonData);
+                this.showWarning = false;
+                return JSON.parse(this.jsonData);
+            } catch {
+                this.showWarning = true;
+                return this.showText;
+            }
+        }
     },
     methods: {
         onCopy(e) {
@@ -72,16 +79,10 @@ export default {
                 type: "error"
             });
         },
-        edit() {
-            this.showEditPane = true;
-            this.editText = JSON.stringify(this.jsonText, null, 2);
-        },
         goBack() {
-            this.showEditPane = false;
             this.$emit("preStep");
         },
         goNext() {
-            this.edit();
             this.$emit("nextStep");
         }
     }
@@ -89,7 +90,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-#json-show {
+#json-edit {
     .btn-group {
         margin-bottom: 10px;
         display: flex;

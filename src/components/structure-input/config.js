@@ -2,9 +2,9 @@ export default {
     NestNum: 10, //最大嵌套层数
     basisTypes: {
         Int: `0`,
-        Int64: `1928475`,
+        Int64: `123456`,
         Date: `"2019-09-21"`,
-        String: `"test"`,
+        String: `"testString"`,
         timestamp: `1569054307819`,
         "List<int>": `[1, 2, 3, 4, 5]`,
         "List<string>": `["a", "b", "c", "d", "e"]`
