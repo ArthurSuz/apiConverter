@@ -1,15 +1,15 @@
 <template>
     <div id="home">
         <div class="steps">
-            <el-steps :active="stepActive" finish-status="success" simple>
-                <el-step title="基本数据"></el-step>
-                <el-step title="详细编辑"></el-step>
-                <el-step title="工具库选择"></el-step>
+            <el-steps :active="stepActive+1" align-center>
+                <el-step title="Basic"></el-step>
+                <el-step title="Detail"></el-step>
+                <el-step title="DoSomething"></el-step>
             </el-steps>
         </div>
         <div class="all-pane">
             <div class="pane" :class="{show: [0].includes(stepActive)}">
-                <structure-input @setJson="setJson" />
+                <structure-input @setJson="setJson" @setTable="setTable" />
             </div>
             <div class="pane" :class="{show: [0,1].includes(stepActive)}">
                 <json-show
@@ -29,7 +29,7 @@
                 />
             </div>
             <div class="pane" :class="{show: [2,3].includes(stepActive)}">
-                TODO
+                <data-produce :tableLists="tableLists" />
             </div>
         </div>
     </div>
@@ -39,19 +39,21 @@
 import JsonShow from "@/components/json-show";
 import StructureInput from "@/components/structure-input";
 import JsonEdit from "@/components/json-edit";
-
+import DataProduce from "@/components/data-produce";
 export default {
     name: "home",
     components: {
         JsonShow,
         StructureInput,
-        JsonEdit
+        JsonEdit,
+        DataProduce
     },
     data() {
         return {
             stepActive: 0,
             jsonText: "",
-            jsonData: ""
+            jsonData: "",
+            tableLists: []
         };
     },
     methods: {
@@ -60,6 +62,9 @@ export default {
         },
         setText(jsonData) {
             this.jsonData = jsonData;
+        },
+        setTable(tableLists) {
+            this.tableLists = tableLists;
         },
         nextStep() {
             this.stepActive += 1;

@@ -13,6 +13,8 @@
                     class="value-type"
                     v-model="item.type"
                     @change="typeChange(index,itemIndex)"
+                    filterable
+                    allow-create
                     placeholder="数据类型"
                 >
                     <el-option v-for="option in options" :key="option" :value="option"></el-option>
@@ -72,6 +74,7 @@ export default {
                 let data = JSON.parse(
                     this.transform(this.backLists[0].data, config.responeType)
                 );
+                this.$emit("setTable", this.setTable());
                 this.$emit("setJson", data);
             },
             immediate: true,
@@ -83,7 +86,7 @@ export default {
             ...Object.keys(config.basisTypes),
             ...Object.keys(config.complexTypes)
         ];
-        this.backLists.push(config.template);
+        this.backLists.push(...config.template);
     },
     methods: {
         addValue(index) {
@@ -132,6 +135,8 @@ export default {
                         );
                         str += `"${item.input}":${childStr ||
                             this.types[item.type]},`;
+                    } else {
+                        str += `"${item.input}":"${item.type}（自定义类型）",`;
                     }
                 }
             });
@@ -150,6 +155,27 @@ export default {
                 return item.name === name;
             });
             return res && res.data;
+        },
+        setTable() {
+            let arr = [];
+            this.backLists.forEach(list => {
+                arr.push({ name: list.name, type: "" });
+                list.data.forEach(item => {
+                    let type;
+                    switch (item.type) {
+                        case "Object":
+                            type = `Object<${item.child}>`;
+                            break;
+                        case "List<obj>":
+                            type = `List<${item.child}>`;
+                            break;
+                        default:
+                            type = item.type;
+                    }
+                    arr.push({ name: item.input, type });
+                });
+            });
+            return arr;
         }
     }
 };

@@ -3,7 +3,7 @@
         <div class="btn-group">
             <div>
                 <el-button-group v-if="stepActive===2">
-                    <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">上一步</el-button>
+                    <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">Previous</el-button>
                 </el-button-group>
             </div>
             <div>
@@ -14,9 +14,9 @@
                         v-clipboard:copy="JSON.stringify(showText, null, 2)"
                         v-clipboard:success="onCopy"
                         icon="el-icon-copy-document"
-                    >复制</el-button>
+                    >Copy</el-button>
                     <el-button size="mini" @click="goNext">
-                        下一步
+                        Next
                         <i class="el-icon-arrow-right"></i>
                     </el-button>
                 </el-button-group>
@@ -69,13 +69,13 @@ export default {
     methods: {
         onCopy(e) {
             this.$message({
-                message: "复制成功！",
+                message: "Copy Success!",
                 type: "success"
             });
         },
         onError(e) {
             this.$message({
-                message: "复制失败！",
+                message: "Copy Fail!",
                 type: "error"
             });
         },
