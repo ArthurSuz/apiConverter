@@ -187,7 +187,10 @@ export default {
             return str.replace(/,}/g, "}");
         },
         findInList(name, index) {
-            let res = this.backLists.slice(index).find(item => {
+            // let res = this.backLists.slice(index).find(item => {
+            //     return item.name === name;
+            // });
+            let res = this.backLists.find(item => {
                 return item.name === name;
             });
             return res;
