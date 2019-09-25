@@ -2,12 +2,12 @@
     <div id="json-edit">
         <div class="btn-group">
             <div>
-                <el-button-group v-if="stepActive===2">
+                <el-button-group v-if="stepActive===3">
                     <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">Previous</el-button>
                 </el-button-group>
             </div>
             <div>
-                <el-button-group v-if="stepActive===1">
+                <el-button-group v-if="stepActive===2">
                     <el-button
                         size="mini"
                         v-clipboard:error="onError"

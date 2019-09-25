@@ -1,10 +1,29 @@
 <template>
     <div id="structure-input">
+        <div class="btn-group">
+            <div>
+                <el-button-group v-if="stepActive===1">
+                    <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">Previous</el-button>
+                </el-button-group>
+            </div>
+            <div>
+                <el-button-group v-if="stepActive===0">
+                    <el-button size="mini" @click="goNext">
+                        Next
+                        <i class="el-icon-arrow-right"></i>
+                    </el-button>
+                </el-button-group>
+            </div>
+        </div>
         <div class="backLists" v-for="(backList,index) in backLists" :key="index">
             <div class="backList-name">
                 <el-input v-model="backList.name">
                     <template slot="prepend">结构名</template>
                 </el-input>
+                <el-select v-model="backList.type" placeholder="结构类型">
+                    <el-option label="[数组]" value="list"></el-option>
+                    <el-option label="{对象}" value="obj"></el-option>
+                </el-select>
                 <el-button icon="el-icon-delete-solid" v-if="index!==0" @click="delList(index)"></el-button>
             </div>
             <div class="value" v-for="(item,itemIndex) in backList.data" :key="itemIndex">
@@ -13,19 +32,12 @@
                     <el-select
                         class="value-type"
                         v-model="item.type"
-                        @change="typeChange(index,itemIndex)"
                         filterable
                         allow-create
                         placeholder="数据类型"
                     >
                         <el-option v-for="option in options" :key="option" :value="option"></el-option>
                     </el-select>
-                    <el-input
-                        class="value-child"
-                        v-model="item.child"
-                        v-if="Object.keys(config.complexTypes).includes(item.type)"
-                        placeholder="子结构名"
-                    ></el-input>
                     <el-button-group>
                         <el-button
                             icon="el-icon-setting"
@@ -63,6 +75,7 @@ import config from "./config";
 
 export default {
     name: "structure-input",
+    props: ["stepActive", "structureText"],
     data() {
         return {
             config,
@@ -70,23 +83,22 @@ export default {
             backListItem: {
                 input: "",
                 type: "",
-                child: "",
                 need: true,
                 remark: ""
             },
             backListsItem: {
                 name: "data",
+                type: "obj",
                 data: [
                     {
                         input: "",
                         type: "",
-                        child: "",
                         need: true,
                         remark: ""
                     }
                 ]
             },
-            types: { ...config.basisTypes, ...config.complexTypes },
+            types: { ...config.basisTypes },
             backLists: [],
             showArr: []
         };
@@ -97,22 +109,19 @@ export default {
                 if (!this.backLists[0]) {
                     return;
                 }
-                let data = JSON.parse(
-                    this.transform(this.backLists[0].data, config.responeType)
-                );
+                let data = JSON.parse(this.transform(this.backLists[0]));
                 this.$emit("setTable", this.setTable());
                 this.$emit("setJson", data);
             },
             immediate: true,
             deep: true
+        },
+        structureText: function(newValue, oldValue) {
+            this.backLists = newValue;
         }
     },
     mounted() {
-        this.options = [
-            ...Object.keys(config.basisTypes),
-            ...Object.keys(config.complexTypes)
-        ];
-        this.backLists.push(...config.template);
+        this.options = [...Object.keys(config.basisTypes)];
     },
     methods: {
         addValue(index) {
@@ -139,47 +148,40 @@ export default {
         delList(index) {
             this.backLists.splice(index, 1);
         },
-        typeChange(index, itemIndex) {
-            this.backLists[index].data[itemIndex].child = "";
-        },
         newOBJ(obj) {
             return JSON.parse(JSON.stringify(obj));
         },
-        transform(data, type, index = 0) {
+        transform(list, index = 0) {
             if (index > config.NestNum) {
                 this.$message.error(`嵌套最多${index}层, 请勿循环嵌套`);
                 return;
             }
-            if (!data) {
+            if (!list) {
                 return;
             }
+            let data = list.data;
             let str = "";
             data.forEach(item => {
                 if (item.input) {
+                    str += `"${item.input}":`;
                     if (Object.keys(config.basisTypes).includes(item.type)) {
-                        str += `"${item.input}":${this.types[item.type]},`;
-                    } else if (
-                        Object.keys(config.complexTypes).includes(item.type)
-                    ) {
-                        index++;
-                        let childStr = this.transform(
-                            this.findInList(item.child, index),
-                            item.type,
-                            index
-                        );
-                        str += `"${item.input}":${childStr ||
-                            this.types[item.type]},`;
+                        str += `${this.types[item.type]},`;
+                    } else if (item.type === "interface{}") {
+                        str += `null,`;
                     } else {
-                        str += `"${item.input}":"${item.type}（自定义类型）",`;
+                        index++;
+                        let res = this.findInList(item.type, index);
+                        let childStr = this.transform(res, index) || "null";
+                        str += `${childStr},`;
                     }
                 }
             });
-            switch (type) {
-                case "Object":
+            switch (list.type) {
+                case "obj":
                     str = str ? `{${str}}` : "";
                     break;
-                case "List<obj>":
-                    str = str ? `[{${str}},{${str}},{${str}}]` : "";
+                case "list":
+                    str = str ? `[{${str}}]` : "";
                     break;
             }
             return str.replace(/,}/g, "}");
@@ -188,33 +190,28 @@ export default {
             let res = this.backLists.slice(index).find(item => {
                 return item.name === name;
             });
-            return res && res.data;
+            return res;
         },
         setTable() {
             let arr = [];
             this.backLists.forEach(list => {
                 arr.push({ name: list.name, type: "", need: "", remark: "" });
                 list.data.forEach(item => {
-                    let type;
-                    switch (item.type) {
-                        case "Object":
-                            type = `Object<${item.child}>`;
-                            break;
-                        case "List<obj>":
-                            type = `List<${item.child}>`;
-                            break;
-                        default:
-                            type = item.type;
-                    }
                     arr.push({
                         name: item.input,
-                        type,
+                        type: item.type,
                         need: item.need,
                         remark: item.remark
                     });
                 });
             });
             return arr;
+        },
+        goBack() {
+            this.$emit("preStep");
+        },
+        goNext() {
+            this.$emit("nextStep");
         }
     }
 };
@@ -224,6 +221,11 @@ export default {
 #structure-input {
     display: flex;
     flex-direction: column;
+    .btn-group {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
     .value {
         display: flex;
         flex-direction: column;

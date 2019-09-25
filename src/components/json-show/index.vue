@@ -2,12 +2,13 @@
     <div id="json-show">
         <div class="btn-group">
             <div>
-                <el-button-group v-if="stepActive===1">
+                <el-button-group v-if="stepActive===2">
                     <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">Previous</el-button>
+                    <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
                 </el-button-group>
             </div>
             <div>
-                <el-button-group v-if="stepActive===0">
+                <el-button-group v-if="stepActive===1">
                     <el-button
                         size="mini"
                         v-clipboard:error="onError"
@@ -45,7 +46,7 @@ export default {
         copyText: function() {
             return this.showEditPane
                 ? this.editText
-                : JSON.stringify(this.jsonText, null, 2);
+                : JSON.stringify(this.jsonText, null, 4);
         }
     },
     watch: {
@@ -60,6 +61,9 @@ export default {
         };
     },
     methods: {
+        align() {
+            this.editText = JSON.stringify(JSON.parse(this.editText), null, 4);
+        },
         onCopy(e) {
             this.$message({
                 message: "Copy Success!",
@@ -74,7 +78,7 @@ export default {
         },
         edit() {
             this.showEditPane = true;
-            this.editText = JSON.stringify(this.jsonText, null, 2);
+            this.editText = JSON.stringify(this.jsonText, null, 4);
         },
         goBack() {
             this.showEditPane = false;
