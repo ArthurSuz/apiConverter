@@ -16,7 +16,7 @@
     </div>
 </template>
 <script>
-import { jsonToGo, jsonToStruct } from "@/utils/format.js";
+import { jsonToStruct } from "@/utils/format.js";
 import config from "./config";
 
 export default {

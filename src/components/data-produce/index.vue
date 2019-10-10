@@ -35,13 +35,26 @@
                     :data="jsonAFC"
                 ></vue-json-pretty>
             </el-tab-pane>
-            <el-tab-pane label="YAPI">TODO</el-tab-pane>
+            <el-tab-pane label="GO">
+                <el-button
+                    class="export-btn"
+                    type="info"
+                    v-clipboard:error="onError"
+                    v-clipboard:copy="GoText"
+                    v-clipboard:success="onCopy"
+                >复制GO</el-button>
+                <el-card shadow="hover">
+                     <el-checkbox v-model="InlineType">Inline type definitions</el-checkbox>
+                    <pre>{{GoText}}</pre>
+                </el-card>
+            </el-tab-pane>
             <el-tab-pane label="TODO">TODO</el-tab-pane>
         </el-tabs>
     </div>
 </template>
 <script>
 import VueJsonPretty from "vue-json-pretty";
+import { jsonToGo } from "@/utils/format.js";
 export default {
     name: "data-produce",
     components: {
@@ -50,12 +63,18 @@ export default {
     props: ["tableLists", "jsonAFC"],
     data() {
         return {
-            exportLoading: false
+            exportLoading: false,
+            InlineType: false
         };
     },
     computed: {
         copyText: function() {
             return JSON.stringify(this.jsonAFC, null, 4);
+        },
+        GoText: function() {
+            let data = JSON.stringify(this.jsonAFC);
+            let type = !this.InlineType;
+            return jsonToGo(data, "", type).go;
         }
     },
     methods: {
@@ -81,7 +100,7 @@ export default {
         exportExcel() {
             this.exportLoading = true;
             let data = this.getArr();
-            import("@/excel/Export2Excel").then(excel => {
+            import("@/utils/Export2Excel").then(excel => {
                 this.exportLoading = false;
                 excel.export_json_to_excel({
                     header: ["字段名称", "类型", "必填", "备注"],
