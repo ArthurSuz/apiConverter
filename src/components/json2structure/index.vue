@@ -12,7 +12,13 @@
             show-icon
             center
         ></el-alert>
-        <el-input :autosize="{minRows: 10, maxRows: 25}" type="textarea" v-model="jsonText"></el-input>
+        <el-input
+            id="jsonInput"
+            @keydown.tab.native="pressTab"
+            :autosize="{minRows: 10, maxRows: 25}"
+            type="textarea"
+            v-model="jsonText"
+        ></el-input>
     </div>
 </template>
 <script>
@@ -102,6 +108,25 @@ export default {
             } catch {
                 this.showWarning = true;
             }
+        },
+        //将tab事件转换为添加4个空格
+        async pressTab(e) {
+            let jsonInput = document.querySelector("#jsonInput");
+            let startPos = jsonInput.selectionStart;
+            let endPos = jsonInput.selectionEnd;
+            //仅在无选中时有效
+            // if (startPos === endPos) {
+                let myValue = `    `; //四个空格
+                this.jsonText =
+                    jsonInput.value.substring(0, startPos) +
+                    myValue +
+                    jsonInput.value.substring(endPos, jsonInput.value.length);
+                await this.$nextTick();
+                jsonInput.focus();
+                let newPos = startPos + myValue.length;
+                jsonInput.setSelectionRange(newPos, newPos);
+            // }
+            e.preventDefault();
         }
     }
 };
