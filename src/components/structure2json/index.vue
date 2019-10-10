@@ -153,7 +153,7 @@ export default {
         },
         transform(list, index = 0) {
             if (index > config.NestNum) {
-                this.$message.error(`嵌套最多${index}层, 请勿循环嵌套`);
+                this.$message.error(`嵌套最多${config.NestNum}层, 请勿循环嵌套`);
                 return;
             }
             if (!list) {
@@ -161,6 +161,7 @@ export default {
             }
             let data = list.data;
             let str = "";
+            index++;
             data.forEach(item => {
                 if (item.input) {
                     str += `"${item.input}":`;
@@ -169,8 +170,7 @@ export default {
                     } else if (item.type === "interface{}") {
                         str += `null,`;
                     } else {
-                        index++;
-                        let res = this.findInList(item.type, index);
+                        let res = this.findInList(item.type, list.name);
                         let childStr = this.transform(res, index) || "null";
                         str += `${childStr},`;
                     }
@@ -186,16 +186,15 @@ export default {
             }
             return str.replace(/,}/g, "}");
         },
-        findInList(name, index) {
-            // 禁止父级循环
-            // let res = this.backLists.slice(index).find(item => {
-            //     return item.name === name;
-            // });
+        findInList(name, faName) {
             let arr = [...this.backLists];
-            arr.splice(index - 1, 1); //排除自循环
-            let res = arr.find(item => {
-                return item.name === name;
-            });
+            let res = arr
+                .filter(item => {
+                    return item.name !== faName;
+                }) //排除自循环
+                .find(item => {
+                    return item.name === name;
+                });
             return res;
         },
         setTable() {

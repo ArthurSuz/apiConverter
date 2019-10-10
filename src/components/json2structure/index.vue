@@ -114,18 +114,15 @@ export default {
             let jsonInput = document.querySelector("#jsonInput");
             let startPos = jsonInput.selectionStart;
             let endPos = jsonInput.selectionEnd;
-            //仅在无选中时有效
-            // if (startPos === endPos) {
-                let myValue = `    `; //四个空格
-                this.jsonText =
-                    jsonInput.value.substring(0, startPos) +
-                    myValue +
-                    jsonInput.value.substring(endPos, jsonInput.value.length);
-                await this.$nextTick();
-                jsonInput.focus();
-                let newPos = startPos + myValue.length;
-                jsonInput.setSelectionRange(newPos, newPos);
-            // }
+            let myValue = `    `; //四个空格
+            this.jsonText =
+                jsonInput.value.substring(0, startPos) +
+                myValue +
+                jsonInput.value.substring(endPos, jsonInput.value.length);
+            await this.$nextTick();
+            jsonInput.focus();
+            let newPos = startPos + myValue.length;
+            jsonInput.setSelectionRange(newPos, newPos);
             e.preventDefault();
         }
     }
