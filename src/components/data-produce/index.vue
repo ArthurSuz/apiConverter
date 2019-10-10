@@ -1,7 +1,12 @@
 <template>
     <div id="data-produce">
-        <el-collapse v-model="activeName" accordion>
-            <el-collapse-item title="Table(from Basic) For EXCEL" name="1">
+        <div class="btn-group">
+            <el-button-group>
+                <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">Return</el-button>
+            </el-button-group>
+        </div>
+        <el-tabs>
+            <el-tab-pane label="Table For EXCEL">
                 <el-button
                     class="export-btn"
                     type="info"
@@ -14,27 +19,58 @@
                     <el-table-column prop="need" label="必填"></el-table-column>
                     <el-table-column prop="remark" label="备注"></el-table-column>
                 </el-table>
-            </el-collapse-item>
-            <el-collapse-item title="YAPI" name="2">
-                <div>TODO</div>
-            </el-collapse-item>
-            <el-collapse-item title="TODO" name="3">
-                <div>TODO</div>
-            </el-collapse-item>
-        </el-collapse>
+            </el-tab-pane>
+            <el-tab-pane label="JSON">
+                <el-button
+                    class="export-btn"
+                    type="info"
+                    v-clipboard:error="onError"
+                    v-clipboard:copy="copyText"
+                    v-clipboard:success="onCopy"
+                >复制JSON</el-button>
+                <vue-json-pretty
+                    :highlightMouseoverNode="true"
+                    :showLength="true"
+                    :deep="3"
+                    :data="jsonAFC"
+                ></vue-json-pretty>
+            </el-tab-pane>
+            <el-tab-pane label="YAPI">TODO</el-tab-pane>
+            <el-tab-pane label="TODO">TODO</el-tab-pane>
+        </el-tabs>
     </div>
 </template>
 <script>
+import VueJsonPretty from "vue-json-pretty";
 export default {
     name: "data-produce",
-    props: ["tableLists"],
+    components: {
+        VueJsonPretty
+    },
+    props: ["tableLists", "jsonAFC"],
     data() {
         return {
-            activeName: "1",
             exportLoading: false
         };
     },
+    computed: {
+        copyText: function() {
+            return JSON.stringify(this.jsonAFC, null, 4);
+        }
+    },
     methods: {
+        onCopy(e) {
+            this.$message({
+                message: "Copy Success!",
+                type: "success"
+            });
+        },
+        onError(e) {
+            this.$message({
+                message: "Copy Fail!",
+                type: "error"
+            });
+        },
         getArr() {
             let arr = [];
             this.tableLists.forEach(item => {
@@ -55,6 +91,9 @@ export default {
                     bookType: "xlsx"
                 });
             });
+        },
+        goBack() {
+            this.$emit("preStep");
         }
     }
 };
@@ -62,6 +101,11 @@ export default {
 
 <style lang="less" scoped>
 #data-produce {
+    .btn-group {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: flex-start;
+    }
     .export-btn {
         width: 100%;
         margin-bottom: 5px;

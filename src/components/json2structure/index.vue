@@ -1,5 +1,5 @@
 <template>
-    <div id="go-input">
+    <div id="json2structure">
         <el-button-group class="btn-group">
             <el-button size="mini" icon="el-icon-refresh-left" @click="reset">Reset</el-button>
             <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
@@ -12,7 +12,7 @@
             show-icon
             center
         ></el-alert>
-        <el-input :autosize="{minRows: 18}" type="textarea" v-model="jsonText"></el-input>
+        <el-input :autosize="{minRows: 10, maxRows: 25}" type="textarea" v-model="jsonText"></el-input>
     </div>
 </template>
 <script>
@@ -20,7 +20,7 @@ import { jsonToGo, jsonToStruct } from "@/utils/format.js";
 import config from "./config";
 
 export default {
-    name: "go-input",
+    name: "json2structure",
     data() {
         return {
             jsonText: "",
@@ -107,7 +107,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#go-input {
+#json2structure {
     .btn-group {
         margin-bottom: 10px;
     }

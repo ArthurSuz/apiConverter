@@ -1,20 +1,20 @@
 <template>
     <div id="home">
         <div class="steps">
-            <el-steps :active="stepActive" align-center>
-                <el-step title="Basic"></el-step>
-                <el-step title="Detail"></el-step>
-                <el-step title="DoSomething"></el-step>
+            <el-steps :active="stepActive" align-center finish-status="success">
+                <el-step title="JSON to Structure"></el-step>
+                <el-step title="Structure to JSON"></el-step>
+                <el-step title="JSON self modification"></el-step>
             </el-steps>
         </div>
         <div class="all-pane">
             <div class="pane" :class="{show: [0].includes(stepActive)}">
-                <go-input @setStructure="setStructure" />
+                <json2structure @setStructure="setStructure" />
             </div>
             <div class="pane" :class="{show: [0,1].includes(stepActive)}">
-                <structure-input
+                <structure2json
                     :structureText="structureText"
-                    @setJson="setJson"
+                    @setJsonBFC="setJsonBFC"
                     @setTable="setTable"
                     @nextStep="nextStep"
                     @preStep="preStep"
@@ -22,65 +22,55 @@
                 />
             </div>
             <div class="pane" :class="{show: [1,2].includes(stepActive)}">
-                <json-show
-                    :jsonText="jsonText"
-                    @setText="setText"
-                    @nextStep="nextStep"
-                    @preStep="preStep"
-                    :stepActive="stepActive"
-                />
-            </div>
-            <div class="pane" :class="{show: [2,3].includes(stepActive)}">
-                <json-edit
-                    :jsonData="jsonData"
+                <json2json
+                    :jsonBFC="jsonBFC"
+                    @setJsonAFC="setJsonAFC"
                     @nextStep="nextStep"
                     @preStep="preStep"
                     :stepActive="stepActive"
                 />
             </div>
             <div class="pane" :class="{show: [3].includes(stepActive)}">
-                <data-produce :tableLists="tableLists" />
+                <data-produce :tableLists="tableLists" :jsonAFC="jsonAFC" @preStep="preStep" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import GoInput from "@/components/go-input";
-import JsonShow from "@/components/json-show";
-import StructureInput from "@/components/structure-input";
-import JsonEdit from "@/components/json-edit";
+import json2structure from "@/components/json2structure";
+import structure2json from "@/components/structure2json";
+import json2json from "@/components/json2json";
 import DataProduce from "@/components/data-produce";
 export default {
     name: "home",
     components: {
-        GoInput,
-        JsonShow,
-        StructureInput,
-        JsonEdit,
+        json2structure,
+        structure2json,
+        json2json,
         DataProduce
     },
     data() {
         return {
             stepActive: 0,
             structureText: "",
-            jsonText: "",
-            jsonData: "",
-            tableLists: []
+            jsonBFC: "",
+            tableLists: [],
+            jsonAFC: ""
         };
     },
     methods: {
         setStructure(structureText) {
             this.structureText = structureText;
         },
-        setJson(jsonText) {
-            this.jsonText = jsonText;
-        },
-        setText(jsonData) {
-            this.jsonData = jsonData;
+        setJsonBFC(jsonBFC) {
+            this.jsonBFC = jsonBFC;
         },
         setTable(tableLists) {
             this.tableLists = tableLists;
+        },
+        setJsonAFC(jsonAFC) {
+            this.jsonAFC = jsonAFC;
         },
         nextStep() {
             this.stepActive += 1;
@@ -94,11 +84,9 @@ export default {
 
 <style lang="less" scoped>
 #home {
-    .steps {
-    }
     .all-pane {
         display: flex;
-        // flex-wrap: wrap;
+        flex-wrap: wrap;
         margin-top: 20px;
         height: fit-content;
         .pane {
@@ -106,15 +94,18 @@ export default {
             height: 0;
             overflow: hidden;
             transition: 0.5s;
+            margin-bottom: 20px;
         }
         .show {
             flex: 1;
             height: auto;
             min-width: 300px;
+            padding-right: 15px;
         }
         .show + .show {
-            margin-left: 15px;
+            // margin-left: 15px;
             padding-left: 15px;
+            padding-right: 0;
             border-left: 1px solid #dcdfe6;
         }
     }

@@ -1,5 +1,5 @@
 export default {
-    NestNum: 10, //最大嵌套层数
+    NestNum: 9, //最大嵌套层数
     basisTypes: {
         int: `0`,
         int64: `12345678910`,

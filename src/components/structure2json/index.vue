@@ -1,5 +1,5 @@
 <template>
-    <div id="structure-input">
+    <div id="structure2json">
         <div class="btn-group">
             <div>
                 <el-button-group v-if="stepActive===1">
@@ -74,7 +74,7 @@
 import config from "./config";
 
 export default {
-    name: "structure-input",
+    name: "structure2json",
     props: ["stepActive", "structureText"],
     data() {
         return {
@@ -111,7 +111,7 @@ export default {
                 }
                 let data = JSON.parse(this.transform(this.backLists[0]));
                 this.$emit("setTable", this.setTable());
-                this.$emit("setJson", data);
+                this.$emit("setJsonBFC", data);
             },
             immediate: true,
             deep: true
@@ -187,10 +187,13 @@ export default {
             return str.replace(/,}/g, "}");
         },
         findInList(name, index) {
+            // 禁止父级循环
             // let res = this.backLists.slice(index).find(item => {
             //     return item.name === name;
             // });
-            let res = this.backLists.find(item => {
+            let arr = [...this.backLists];
+            arr.splice(index - 1, 1); //排除自循环
+            let res = arr.find(item => {
                 return item.name === name;
             });
             return res;
@@ -221,7 +224,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-#structure-input {
+#structure2json {
     display: flex;
     flex-direction: column;
     .btn-group {
