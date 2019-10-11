@@ -39,7 +39,7 @@
                     v-clipboard:success="onCopy"
                 >复制GO</el-button>
                 <el-card shadow="hover">
-                     <el-checkbox v-model="InlineType">Inline type definitions</el-checkbox>
+                    <el-checkbox v-model="InlineType">Inline type definitions</el-checkbox>
                     <pre>{{GoText}}</pre>
                 </el-card>
             </el-tab-pane>
@@ -93,7 +93,7 @@ export default {
         getArr() {
             let arr = [];
             this.tableLists.forEach(item => {
-                arr.push([item.name, item.type]);
+                arr.push([item.name, item.type, item.need, item.remark]);
             });
             return arr;
         },
