@@ -1,17 +1,20 @@
 <template>
     <div id="json2structure">
-        <el-button-group class="btn-group">
-            <el-button size="mini" icon="el-icon-refresh-left" @click="reset">Reset</el-button>
-            <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
-        </el-button-group>
-        <el-alert
-            v-show="showWarning"
-            :title="errMessage"
-            type="warning"
-            :closable="false"
-            show-icon
-            center
-        ></el-alert>
+        <div class="tools">
+            <el-button-group class="btn-group">
+                <el-button size="mini" icon="el-icon-refresh-left" @click="reset">Reset</el-button>
+                <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
+            </el-button-group>
+            <el-alert
+                v-if="showWarning"
+                :title="errMessage"
+                type="warning"
+                :closable="false"
+                show-icon
+                center
+            ></el-alert>
+            <el-alert v-else title="标准JSON格式" type="success" :closable="false" show-icon center></el-alert>
+        </div>
         <el-input
             id="jsonInput"
             @keydown.tab.native="pressTab"
@@ -32,7 +35,7 @@ export default {
             jsonText: "",
             jsonData: "",
             showWarning: false,
-            errMessage: "非标准JSON"
+            errMessage: "非标准JSON格式"
         };
     },
     watch: {
@@ -42,7 +45,7 @@ export default {
         jsonData: function(newValue, oldValue) {
             if (JSON.stringify(newValue) === "[]" || !newValue) {
                 this.showWarning = true;
-                this.errMessage = "非标准JSON";
+                this.errMessage = "非标准JSON格式";
                 this.jsonData = "";
                 return;
             }
@@ -136,8 +139,12 @@ export default {
 </script>
 <style lang="less" scoped>
 #json2structure {
-    .btn-group {
-        margin-bottom: 10px;
+    .tools {
+        display: flex;
+        .btn-group {
+            display: flex;
+            flex-wrap: nowrap;
+        }
     }
 }
 </style>
