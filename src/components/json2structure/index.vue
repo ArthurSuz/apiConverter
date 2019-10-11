@@ -74,6 +74,13 @@ export default {
                 let arr = [];
                 let arrList = [];
                 Object.keys(obj).forEach(key => {
+                    Object.keys(obj[key]).forEach(key2 => {
+                        if (`[]${key2}` === obj[key][key2]) {
+                            arrList.push(key2);
+                        }
+                    });
+                });
+                Object.keys(obj).forEach(key => {
                     let params = {};
                     if (key.includes("[]") || arrList.includes(key)) {
                         params = {
@@ -92,7 +99,6 @@ export default {
                         let type = obj[key][key2];
                         if (`[]${key2}` === type) {
                             type = key2;
-                            arrList.push(key2);
                         }
                         params.data.push({
                             input: key2,
