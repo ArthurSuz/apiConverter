@@ -1,20 +1,5 @@
 <template>
     <div id="structure2json">
-        <div class="btn-group">
-            <div>
-                <el-button-group v-if="stepActive===1">
-                    <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">Previous</el-button>
-                </el-button-group>
-            </div>
-            <div>
-                <el-button-group v-if="stepActive===0">
-                    <el-button size="mini" @click="goNext">
-                        Next
-                        <i class="el-icon-arrow-right"></i>
-                    </el-button>
-                </el-button-group>
-            </div>
-        </div>
         <div class="backLists" v-for="(backList,index) in backLists" :key="index">
             <div class="backList-name">
                 <el-input v-model="backList.name">
@@ -75,7 +60,6 @@ import config from "./config";
 
 export default {
     name: "structure2json",
-    props: ["stepActive", "structureText"],
     data() {
         return {
             config,
@@ -103,6 +87,11 @@ export default {
             showArr: []
         };
     },
+    computed: {
+        structureText: function() {
+            return this.$store.getters.getStructureText;
+        }
+    },
     watch: {
         backLists: {
             handler(newValue, oldValue) {
@@ -110,8 +99,8 @@ export default {
                     return;
                 }
                 let data = JSON.parse(this.transform(this.backLists[0]));
-                this.$emit("setTable", this.setTable());
-                this.$emit("setJsonBFC", data);
+                this.$store.commit("updateTableLists", this.setTable());
+                this.$store.commit("updateJsonBFC", data);
             },
             immediate: true,
             deep: true
@@ -211,12 +200,6 @@ export default {
                 });
             });
             return arr;
-        },
-        goBack() {
-            this.$emit("preStep");
-        },
-        goNext() {
-            this.$emit("nextStep");
         }
     }
 };
@@ -226,11 +209,6 @@ export default {
 #structure2json {
     display: flex;
     flex-direction: column;
-    .btn-group {
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-    }
     .value {
         display: flex;
         flex-direction: column;

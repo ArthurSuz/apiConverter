@@ -1,10 +1,5 @@
 <template>
     <div id="data-produce">
-        <div class="btn-group">
-            <el-button-group>
-                <el-button size="mini" icon="el-icon-arrow-left" @click="goBack">Return</el-button>
-            </el-button-group>
-        </div>
         <el-tabs>
             <el-tab-pane label="Table For EXCEL">
                 <el-button
@@ -60,7 +55,6 @@ export default {
     components: {
         VueJsonPretty
     },
-    props: ["tableLists", "jsonAFC"],
     data() {
         return {
             exportLoading: false,
@@ -75,6 +69,12 @@ export default {
             let data = JSON.stringify(this.jsonAFC);
             let type = !this.InlineType;
             return jsonToGo(data, "", type).go;
+        },
+        tableLists: function() {
+            return this.$store.getters.getTableLists;
+        },
+        jsonAFC: function() {
+            return this.$store.getters.getJsonAFC;
         }
     },
     methods: {
@@ -110,9 +110,6 @@ export default {
                     bookType: "xlsx"
                 });
             });
-        },
-        goBack() {
-            this.$emit("preStep");
         }
     }
 };
@@ -120,11 +117,6 @@ export default {
 
 <style lang="less" scoped>
 #data-produce {
-    .btn-group {
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: flex-start;
-    }
     .export-btn {
         width: 100%;
         margin-bottom: 5px;

@@ -1,10 +1,22 @@
 <template>
     <div id="home">
         <el-steps :active="stepActive" align-center finish-status="success">
-            <el-step title="JSON to Structure"></el-step>
-            <el-step title="Structure to JSON"></el-step>
-            <el-step title="JSON self modification"></el-step>
+            <el-step title="First" description="Json->Structure"></el-step>
+            <el-step title="Second" description="Structure->Json"></el-step>
+            <el-step title="Third" description="Json<-modify"></el-step>
         </el-steps>
+        <div class="btn-group">
+            <el-button
+                size="mini"
+                icon="el-icon-arrow-left"
+                @click="preStep"
+                :disabled="stepActive===0"
+            >Back</el-button>
+            <el-button size="mini" @click="nextStep" :disabled="stepActive===3">
+                Next
+                <i class="el-icon-arrow-right"></i>
+            </el-button>
+        </div>
         <el-alert
             class="alert"
             :title="alert.title"
@@ -14,29 +26,16 @@
         ></el-alert>
         <div class="all-pane">
             <div class="pane" :class="{show: [0].includes(stepActive)}">
-                <json2structure @setStructure="setStructure" />
+                <json2structure />
             </div>
             <div class="pane" :class="{show: [0,1].includes(stepActive)}">
-                <structure2json
-                    :structureText="structureText"
-                    @setJsonBFC="setJsonBFC"
-                    @setTable="setTable"
-                    @nextStep="nextStep"
-                    @preStep="preStep"
-                    :stepActive="stepActive"
-                />
+                <structure2json />
             </div>
             <div class="pane" :class="{show: [1,2].includes(stepActive)}">
-                <json2json
-                    :jsonBFC="jsonBFC"
-                    @setJsonAFC="setJsonAFC"
-                    @nextStep="nextStep"
-                    @preStep="preStep"
-                    :stepActive="stepActive"
-                />
+                <json2json :stepActive="stepActive" />
             </div>
             <div class="pane" :class="{show: [3].includes(stepActive)}">
-                <data-produce :tableLists="tableLists" :jsonAFC="jsonAFC" @preStep="preStep" />
+                <data-produce />
             </div>
         </div>
     </div>
@@ -58,10 +57,6 @@ export default {
     data() {
         return {
             stepActive: 0,
-            structureText: "",
-            jsonBFC: "",
-            tableLists: [],
-            jsonAFC: "",
             alert: {
                 title: "",
                 description: ""
@@ -86,7 +81,7 @@ export default {
                         break;
                     case 2:
                         this.alert.title =
-                            "点击左侧节点修改JSON数据细节，点击Finish进行更多操作";
+                            "点击左侧节点修改JSON数据细节，点击Next进行更多操作";
                         this.alert.description =
                             "tips：1.焦点离开输入框或者点击Enter键时生效修改，可在左侧看到修改结果；2.个别值暂时不支持修改";
                         break;
@@ -100,18 +95,6 @@ export default {
         }
     },
     methods: {
-        setStructure(structureText) {
-            this.structureText = structureText;
-        },
-        setJsonBFC(jsonBFC) {
-            this.jsonBFC = jsonBFC;
-        },
-        setTable(tableLists) {
-            this.tableLists = tableLists;
-        },
-        setJsonAFC(jsonAFC) {
-            this.jsonAFC = jsonAFC;
-        },
         nextStep() {
             this.stepActive += 1;
         },
@@ -124,6 +107,11 @@ export default {
 
 <style lang="less" scoped>
 #home {
+    .btn-group {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
     .alert {
         margin-top: 20px;
     }

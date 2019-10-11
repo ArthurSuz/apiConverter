@@ -1,22 +1,6 @@
 <template>
     <div id="json2json">
         <div class="item-pane">
-            <div class="btn-group">
-                <div>
-                    <el-button
-                        size="mini"
-                        icon="el-icon-arrow-left"
-                        @click="goBack"
-                        v-if="stepActive===2"
-                    >Previous</el-button>
-                </div>
-                <div>
-                    <el-button size="mini" @click="goNext" v-if="stepActive===1">
-                        Next
-                        <i class="el-icon-arrow-right"></i>
-                    </el-button>
-                </div>
-            </div>
             <vue-json-pretty
                 :highlightMouseoverNode="true"
                 :showLength="true"
@@ -29,15 +13,6 @@
             ></vue-json-pretty>
         </div>
         <div class="item-pane" v-if="stepActive===2">
-            <div class="btn-group">
-                <div></div>
-                <el-button-group>
-                    <el-button size="mini" @click="goNext">
-                        Finish
-                        <i class="el-icon-arrow-right"></i>
-                    </el-button>
-                </el-button-group>
-            </div>
             <el-alert
                 :style="`margin-top:${alertMarginTop}px`"
                 :title="alertData.title"
@@ -69,7 +44,7 @@
                     inactive-color="#ff4949"
                     v-else-if="selectType === '[object Boolean]'"
                 ></el-switch>
-                <el-button-group class="btn-group" v-else-if="selectType === '[object Array]'">
+                <div class="btn-group" v-else-if="selectType === '[object Array]'">
                     <el-button
                         class="btn"
                         type="success"
@@ -82,7 +57,7 @@
                         icon="el-icon-minus"
                         @click="setJsonData('del')"
                     >删除最后一个元素</el-button>
-                </el-button-group>
+                </div>
             </div>
         </div>
     </div>
@@ -95,7 +70,7 @@ export default {
     components: {
         VueJsonPretty
     },
-    props: ["jsonBFC", "stepActive"],
+    props: ["stepActive"],
     computed: {
         alertData: function() {
             let params = {
@@ -131,6 +106,9 @@ export default {
                 }
             }
             return params;
+        },
+        jsonBFC: function() {
+            return this.$store.getters.getJsonBFC;
         }
     },
     watch: {
@@ -141,7 +119,7 @@ export default {
             this.selectType = this.$options.selectType;
         },
         root: function(newValue, oldValue) {
-            this.$emit("setJsonAFC", newValue);
+            this.$store.commit("updateJsonAFC", newValue);
         }
     },
     data() {
@@ -154,12 +132,6 @@ export default {
         };
     },
     methods: {
-        goBack() {
-            this.$emit("preStep");
-        },
-        goNext() {
-            this.$emit("nextStep");
-        },
         selectPath(path, data) {
             this.alertMarginTop = window.pageYOffset;
             this.selectItemKeys = path;
@@ -213,34 +185,16 @@ export default {
         padding-left: 15px;
         border-left: 1px solid #dcdfe6;
     }
-    .btn-group {
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-    }
     .change-input {
         margin: 10px;
     }
     .btn-group {
         width: 100%;
+        display: flex;
         flex-wrap: wrap;
         .btn {
             flex: 1;
             overflow: hidden;
-        }
-    }
-}
-</style>
-<style lang="less">
-#json2json {
-    .btn-group {
-        .btn {
-            span {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                width: 100%;
-                display: inline-block;
-            }
         }
     }
 }

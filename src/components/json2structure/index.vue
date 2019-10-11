@@ -46,7 +46,7 @@ export default {
                 this.jsonData = "";
                 return;
             }
-            this.$emit("setStructure", newValue);
+            this.$store.commit("updateStructureText", newValue);
         }
     },
     mounted() {
