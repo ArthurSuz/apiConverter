@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import config from "./config";
+import config from "@/config";
 
 export default {
     name: "structure2json",
@@ -82,7 +82,6 @@ export default {
                     }
                 ]
             },
-            types: { ...config.basisTypes },
             backLists: [],
             showArr: []
         };
@@ -95,12 +94,9 @@ export default {
     watch: {
         backLists: {
             handler(newValue, oldValue) {
-                if (!this.backLists[0]) {
-                    return;
+                if (this.backLists[0]) {
+                    this.$store.commit("updateBackLists", newValue);
                 }
-                let data = JSON.parse(this.transform(this.backLists[0]));
-                this.$store.commit("updateTableLists", this.setTable());
-                this.$store.commit("updateJsonBFC", data);
             },
             immediate: true,
             deep: true
@@ -139,67 +135,6 @@ export default {
         },
         newOBJ(obj) {
             return JSON.parse(JSON.stringify(obj));
-        },
-        transform(list, index = 0) {
-            if (index > config.NestNum) {
-                this.$message.error(`嵌套最多${config.NestNum}层, 请勿循环嵌套`);
-                return;
-            }
-            if (!list) {
-                return;
-            }
-            let data = list.data;
-            let str = "";
-            index++;
-            data.forEach(item => {
-                if (item.input) {
-                    str += `"${item.input}":`;
-                    if (Object.keys(config.basisTypes).includes(item.type)) {
-                        str += `${this.types[item.type]},`;
-                    } else if (item.type === "interface{}") {
-                        str += `null,`;
-                    } else {
-                        let res = this.findInList(item.type, list.name);
-                        let childStr = this.transform(res, index) || "null";
-                        str += `${childStr},`;
-                    }
-                }
-            });
-            switch (list.type) {
-                case "obj":
-                    str = str ? `{${str}}` : "";
-                    break;
-                case "list":
-                    str = str ? `[{${str}}]` : "";
-                    break;
-            }
-            return str.replace(/,}/g, "}");
-        },
-        findInList(name, faName) {
-            let arr = [...this.backLists];
-            let res = arr
-                .filter(item => {
-                    return item.name !== faName;
-                }) //排除自循环
-                .find(item => {
-                    return item.name === name;
-                });
-            return res;
-        },
-        setTable() {
-            let arr = [];
-            this.backLists.forEach(list => {
-                arr.push({ name: list.name, type: "", need: "", remark: "" });
-                list.data.forEach(item => {
-                    arr.push({
-                        name: item.input,
-                        type: item.type,
-                        need: item.need,
-                        remark: item.remark
-                    });
-                });
-            });
-            return arr;
         }
     }
 };

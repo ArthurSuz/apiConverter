@@ -26,30 +26,27 @@
 </template>
 <script>
 import { jsonToStruct } from "@/utils/format.js";
-import config from "./config";
+import config from "@/config";
 
 export default {
     name: "json2structure",
     data() {
         return {
             jsonText: "",
-            jsonData: "",
             showWarning: false,
             errMessage: "非标准JSON格式"
         };
     },
     watch: {
         jsonText: function(newValue, oldValue) {
-            this.jsonData = this.transform(newValue);
-        },
-        jsonData: function(newValue, oldValue) {
-            if (JSON.stringify(newValue) === "[]" || !newValue) {
+            let jsonData = this.transform(newValue);
+            if (JSON.stringify(jsonData) === "[]" || !jsonData) {
                 this.showWarning = true;
                 this.errMessage = "非标准JSON格式";
-                this.jsonData = "";
+                jsonData = "";
                 return;
             }
-            this.$store.commit("updateStructureText", newValue);
+            this.$store.commit("updateStructureText", jsonData);
         }
     },
     mounted() {
@@ -64,7 +61,7 @@ export default {
         },
         transform(data) {
             try {
-                if (JSON.stringify(data) === `"{}"`) {
+                if (JSON.stringify(data).replace(/\\n|\s/g, "") === `"{}"`) {
                     this.errMessage = "JSON不可为空";
                     throw "";
                 }
