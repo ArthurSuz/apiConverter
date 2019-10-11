@@ -1,28 +1,20 @@
 <template>
     <div id="home">
-        <el-steps :active="stepActive" align-center finish-status="success">
-            <el-step title="First" description="Json->Structure"></el-step>
-            <el-step title="Second" description="Structure->Json"></el-step>
-            <el-step title="Third" description="Json<-modify"></el-step>
-        </el-steps>
-        <div class="btn-group">
-            <el-button
-                size="mini"
-                icon="el-icon-arrow-left"
-                @click="preStep"
-                :disabled="stepActive===0"
-            >Back</el-button>
-            <el-button size="mini" @click="nextStep" :disabled="stepActive===3">
-                Next
-                <i class="el-icon-arrow-right"></i>
-            </el-button>
+        <div class="stepBtn-group">
+            <el-button icon="el-icon-arrow-left" @click="preStep" :disabled="stepActive===0"></el-button>
+            <el-steps class="step" :active="stepActive" align-center finish-status="success">
+                <el-step title="First" description="Json->Structure"></el-step>
+                <el-step title="Second" description="Structure->Json"></el-step>
+                <el-step title="Third" description="Json<-modify"></el-step>
+            </el-steps>
+            <el-button icon="el-icon-arrow-right" @click="nextStep" :disabled="stepActive===3"></el-button>
         </div>
         <el-alert
             class="alert"
             :title="alert.title"
             :description="alert.description"
             type="info"
-            close-text="知道了"
+            :closable="false"
         ></el-alert>
         <div class="all-pane">
             <div class="pane" :class="{show: [0].includes(stepActive)}">
@@ -69,21 +61,21 @@ export default {
                 switch (newVal) {
                     case 0:
                         this.alert.title =
-                            "粘贴入已有JSON生成结构体，点击Next开始修改结构体";
+                            "粘贴入已有JSON生成结构体";
                         this.alert.description =
-                            "tips：1.若无已有JSON情况请点击Next跳过该步骤；2.复杂JSON结构可能生成有误，请手动在右侧排查";
+                            "tips：1.若无已有JSON情况请跳过该步骤，直接进入下一页；2.复杂JSON结构可能生成有误，请手动在右侧排查；3.下一页中修改结构体";
                         break;
                     case 1:
                         this.alert.title =
-                            "修改当前结构体以生成JSON假数据，点击Next开始修改JSON数据细节";
+                            "修改当前结构体以生成JSON假数据";
                         this.alert.description =
-                            "tips：1.首个结构至少保留一个参数；2.参数的数据类型下拉框中可以手动输入自定义类型；3.可设置对每个参数设置是否必要和备注；4.嵌套深度有限制，请勿循环嵌套；5.不支持自身嵌套";
+                            "tips：1.首个结构至少保留一个参数；2.参数的数据类型下拉框中可以手动输入自定义类型；3.可设置对每个参数设置是否必要和备注；4.嵌套深度有限制，请勿循环嵌套；5.不支持自身嵌套；6.下一页中修改JSON数据细节";
                         break;
                     case 2:
                         this.alert.title =
-                            "点击左侧节点修改JSON数据细节，点击Next进行更多操作";
+                            "点击左侧节点修改JSON数据细节";
                         this.alert.description =
-                            "tips：1.焦点离开输入框或者点击Enter键时生效修改，可在左侧看到修改结果；2.个别值暂时不支持修改";
+                            "tips：1.焦点离开输入框或者点击Enter键时生效修改，可在左侧看到修改结果；2.个别值暂时不支持修改；3.下一页中进行更多操作";
                         break;
                     case 3:
                         this.alert.title = "选择需要的数据进行操作";
@@ -107,10 +99,12 @@ export default {
 
 <style lang="less" scoped>
 #home {
-    .btn-group {
+    .stepBtn-group {
         width: 100%;
         display: flex;
-        justify-content: space-between;
+        .step {
+            width: 100%;
+        }
     }
     .alert {
         margin-top: 20px;
