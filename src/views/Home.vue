@@ -3,7 +3,7 @@
         <div class="stepBtn-group">
             <el-button icon="el-icon-arrow-left" @click="preStep" :disabled="stepActive===0"></el-button>
             <el-steps class="step" :active="stepActive" align-center finish-status="success">
-                <el-step title="First" description="Json->Structure"></el-step>
+                <el-step title="First" description="Json | Go->Structure"></el-step>
                 <el-step title="Second" description="Structure->Json"></el-step>
                 <el-step title="Third" description="Json<-modify"></el-step>
             </el-steps>
@@ -61,9 +61,9 @@ export default {
                 switch (newVal) {
                     case 0:
                         this.alert.title =
-                            "粘贴入已有JSON生成结构体";
+                            "粘贴入已有JSON或GO生成结构体";
                         this.alert.description =
-                            "tips：1.若无已有JSON情况请跳过该步骤，直接进入下一页；2.复杂JSON结构可能生成有误，请手动在右侧排查；3.下一页中修改结构体";
+                            "tips：1.若无已有JSON或GO情况请跳过该步骤，直接进入下一页；2.复杂JSON结构可能生成有误，请手动在右侧排查；3.下一页中修改结构体";
                         break;
                     case 1:
                         this.alert.title =

@@ -44,9 +44,9 @@ const actions = {
                     .find(e => e.name === item.type);
                 if (foundItem && foundItem.type) {
                     switch (foundItem.type) {
-                        case "obj":
-                            item.type = `{}${item.type}`;
-                            break;
+                        // case "obj":
+                        //     item.type = `{}${item.type}`;
+                        //     break;
                         case "list":
                             item.type = `[]${item.type}`;
                             break;

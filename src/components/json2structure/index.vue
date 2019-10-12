@@ -2,18 +2,23 @@
     <div id="json2structure">
         <div class="tools">
             <el-button-group class="btn-group">
-                <el-button size="mini" icon="el-icon-refresh-left" @click="reset">Reset</el-button>
-                <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
+                <el-button
+                    size="mini"
+                    icon="el-icon-copy-document"
+                    @click="changeType"
+                >切换输入格式（当前为{{dataType}})</el-button>
+                <template v-if="dataType === 'JSON'">
+                    <el-button size="mini" icon="el-icon-refresh-left" @click="reset">Reset</el-button>
+                    <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
+                </template>
             </el-button-group>
             <el-alert
-                v-if="showWarning"
-                :title="errMessage"
-                type="warning"
+                :title="`${showWarning?'非':''}标准${dataType}格式`"
+                :type="showWarning?'warning':'success'"
                 :closable="false"
                 show-icon
                 center
             ></el-alert>
-            <el-alert v-else title="标准JSON格式" type="success" :closable="false" show-icon center></el-alert>
         </div>
         <el-input
             id="jsonInput"
@@ -25,7 +30,7 @@
     </div>
 </template>
 <script>
-import { jsonToStruct } from "@/utils/format.js";
+import { jsonToGo } from "@/utils/format.js";
 import config from "@/config";
 
 export default {
@@ -34,25 +39,22 @@ export default {
         return {
             jsonText: "",
             showWarning: false,
-            errMessage: "非标准JSON格式"
+            dataType: "JSON"
         };
     },
     watch: {
         jsonText: function(newValue, oldValue) {
-            let jsonData = this.transform(newValue);
-            if (JSON.stringify(jsonData) === "[]" || !jsonData) {
-                this.showWarning = true;
-                this.errMessage = "非标准JSON格式";
-                jsonData = "";
-                return;
-            }
-            this.$store.commit("updateStructureText", jsonData);
+            this.transform(newValue);
         }
     },
     mounted() {
         this.reset();
     },
     methods: {
+        changeType() {
+            this.dataType = this.dataType === "JSON" ? "GO" : "JSON";
+            this.transform(this.jsonText);
+        },
         reset() {
             this.jsonText = config.template;
         },
@@ -61,56 +63,82 @@ export default {
         },
         transform(data) {
             try {
-                if (JSON.stringify(data).replace(/\\n|\s/g, "") === `"{}"`) {
-                    this.errMessage = "JSON不可为空";
-                    throw "";
+                let obj;
+                switch (this.dataType) {
+                    case "JSON":
+                        if (
+                            JSON.stringify(data).replace(/\\n|\s/g, "") ===
+                            `"{}"`
+                        ) {
+                            throw "";
+                        }
+                        obj = jsonToGo(data).go;
+                        break;
+                    case "GO":
+                        obj = data;
+                        break;
                 }
-                let obj = JSON.parse(
-                    `{${jsonToStruct(data, "Respone").go}}`
-                        .replace(/,}/g, "}")
-                        .replace('"[]":{', '[]":{')
-                        .replace('"":{', '":{')
-                );
-                let arr = [];
-                let arrList = [];
-                Object.keys(obj).forEach(key => {
-                    Object.keys(obj[key]).forEach(key2 => {
-                        if (`[]${key2}` === obj[key][key2]) {
-                            arrList.push(key2);
+                let goDataArr = [];
+                let goDataSp = {};
+                let lastindex = 0;
+                obj.trim().split("\n")
+                    .forEach(e => {
+                        if(!e) {
+                            return;
+                        }
+                        let curArr = e.trim().split(" ").filter(e => e);
+                        switch (curArr[0]) {
+                            case "type":
+                                goDataArr.push({
+                                    name: curArr[1],
+                                    type:
+                                        /(\S*)struct/.exec(curArr[2])[1] ===
+                                        "[]"
+                                            ? "list"
+                                            : "obj",
+                                    data: []
+                                });
+                                break;
+                            case "}":
+                                lastindex++;
+                                break;
+                            default:
+                                if (
+                                    !Object.keys(config.basisTypes).includes(
+                                        curArr[1]
+                                    )
+                                ) {
+                                    if (curArr[1].includes("[]")) {
+                                        goDataSp[curArr[1].replace("[]", "")] =
+                                            "list";
+                                    } else if (
+                                        !curArr[1].includes("interface{}")
+                                    ) {
+                                        goDataSp[curArr[1]] = "obj";
+                                    }
+                                }
+                                goDataArr[lastindex].data.push({
+                                    input: /`json:"(\S*)"`/.exec(curArr[2])[1],
+                                    need: "true",
+                                    remark: "",
+                                    type: curArr[1].replace("[]", "")
+                                });
+                                break;
                         }
                     });
-                });
-                Object.keys(obj).forEach(key => {
-                    let params = {};
-                    if (key.includes("[]") || arrList.includes(key)) {
-                        params = {
-                            name: key.replace("[]", ""),
-                            type: "list",
-                            data: []
-                        };
-                    } else {
-                        params = {
-                            name: key,
-                            type: "obj",
-                            data: []
-                        };
+
+                goDataArr.forEach(item => {
+                    let key = Object.keys(goDataSp).find(e => e === item.name);
+                    if (key) {
+                        item.type = goDataSp[key];
                     }
-                    Object.keys(obj[key]).forEach(key2 => {
-                        let type = obj[key][key2];
-                        if (`[]${key2}` === type) {
-                            type = key2;
-                        }
-                        params.data.push({
-                            input: key2,
-                            type,
-                            need: "true",
-                            remark: ""
-                        });
-                    });
-                    arr.push(params);
                 });
                 this.showWarning = false;
-                return arr;
+                if (JSON.stringify(goDataArr) === "[]" || !goDataArr) {
+                    this.showWarning = true;
+                    throw "";
+                }
+                this.$store.commit("updateStructureText", goDataArr);
             } catch {
                 this.showWarning = true;
             }
