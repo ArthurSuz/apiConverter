@@ -1,4 +1,4 @@
-export function jsonToGo(json, typename, flatten = true) {
+export function jsonToGo(json, typename, flatten = true, dataShow = false) {
     let data;
     let scope;
     let go = "";
@@ -171,10 +171,15 @@ export function jsonToGo(json, typename, flatten = true) {
                 parent = typename
                 parseScope(scope[keys[i]], depth);
                 appender(' `json:"' + keyname);
-                if (omitempty && omitempty[keys[i]] === true) {
+                if (!dataShow && omitempty && omitempty[keys[i]] === true) {
                     appender(',omitempty');
                 }
-                appender('"`\n');
+                appender('"`');
+                if (dataShow) {
+                    appender(" " + typeTransform(scope[keys[i]]));
+                }
+                appender('\n')
+
             }
             indenter(--innerTabs);
             appender("}");
@@ -191,10 +196,14 @@ export function jsonToGo(json, typename, flatten = true) {
                 parent = typename
                 parseScope(scope[keys[i]], depth);
                 append(' `json:"' + keyname);
-                if (omitempty && omitempty[keys[i]] === true) {
+                if (!dataShow && omitempty && omitempty[keys[i]] === true) {
                     append(',omitempty');
                 }
-                append('"`\n');
+                append('"`');
+                if (dataShow) {
+                    append(" " + typeTransform(scope[keys[i]]));
+                }
+                append('\n')
             }
             indent(--tabs);
             append("}");
@@ -354,5 +363,23 @@ export function jsonToGo(json, typename, flatten = true) {
             keys[i] = format(keys[i]);
         }
         return keys
+    }
+
+    function typeTransform(data) {
+        switch (typeof data) {
+            case "string":
+                return `"${data.replace(/"/g, "'")}"`;
+            case "number":
+                return data;
+            case "boolean":
+                return data;
+            case "object":
+                if (Object.prototype.toString.call(data) === '[object Array]' && typeof data[0] !== "object") {
+                    return JSON.stringify(data);
+                }
+                return "null";
+            default:
+                return "null";
+        }
     }
 }

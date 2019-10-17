@@ -73,6 +73,7 @@ const actions = {
         commit('updateTableLists', arr);
     },
     setJsonBFC({ getters, commit }) {
+        // console.log(transform(getters.getBackLists[0]));
         let JsonBFC = JSON.parse(transform(getters.getBackLists[0]));
         commit("updateJsonBFC", JsonBFC);
     },
@@ -88,7 +89,7 @@ const actions = {
                         ) {
                             throw "";
                         }
-                        obj = jsonToGo(data).go;
+                        obj = jsonToGo(data, "", true, true).go;
                         break;
                     case "GO":
                         obj = data;
@@ -103,6 +104,7 @@ const actions = {
                             return;
                         }
                         let curArr = e.trim().split(" ").filter(e => e);
+                        // console.log(curArr);
                         switch (curArr[0]) {
                             case "type":
                                 goDataArr.push({
@@ -137,7 +139,8 @@ const actions = {
                                     input: /`json:"(\S*)"`/.exec(curArr[2])[1],
                                     need: "true",
                                     remark: "",
-                                    type: curArr[1].replace("[]", "")
+                                    type: replaceTheBrackets(curArr[1]),
+                                    originalData: { type: replaceTheBrackets(curArr[1]), value: curArr.slice(3).join(" ") }
                                 });
                                 break;
                         }
@@ -199,9 +202,14 @@ function transform(list, index = 0) {
         if (item.input) {
             str += `"${item.input}":`;
             if (Object.keys(config.basisTypes).includes(item.type)) {
-                str += `${config.basisTypes[item.type]},`;
+                // console.log(item.input,item.originalData.type,item.originalData.value)
+                str += item.originalData && item.originalData.value && item.type === item.originalData.type ? `${item.originalData.value},` : `${config.basisTypes[item.type]},`;
             } else if (item.type.includes("interface{}")) {
-                str += `{},`;
+                if (item.type === "interface{}") {
+                    str += `null,`;
+                } else {
+                    str += `{},`;
+                }
             } else {
                 let res = findInList(item.type, list.name);
                 let childStr = transform(res, index) || "null";
@@ -230,6 +238,10 @@ function findInList(name, faName) {
             return item.name === name;
         });
     return res;
+}
+
+function replaceTheBrackets(val) {
+    return Object.keys(config.basisTypes).includes(val) ? val : val.replace("[]", "");
 }
 
 export default {

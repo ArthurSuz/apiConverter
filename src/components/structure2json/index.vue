@@ -2,6 +2,12 @@
     <div id="structure2json">
         <div class="backLists" v-for="(backList,index) in backLists" :key="index">
             <div class="backList-name">
+                <el-button
+                    icon="el-icon-unlock"
+                    v-if="!valueArr.includes(index)"
+                    @click="hiddenValue(index)"
+                ></el-button>
+                <el-button icon="el-icon-lock" v-else @click="showValue(index)"></el-button>
                 <el-input v-model="backList.name">
                     <template slot="prepend">结构名</template>
                 </el-input>
@@ -11,45 +17,47 @@
                 </el-select>
                 <el-button icon="el-icon-delete-solid" v-if="index!==0" @click="delList(index)"></el-button>
             </div>
-            <div class="value" v-for="(item,itemIndex) in backList.data" :key="itemIndex">
-                <div class="value-main">
-                    <el-input class="value-input" v-model="item.input" placeholder="字段名"></el-input>
-                    <el-select
-                        class="value-type"
-                        v-model="item.type"
-                        filterable
-                        allow-create
-                        placeholder="数据类型"
-                    >
-                        <el-option v-for="option in options" :key="option" :value="option"></el-option>
-                    </el-select>
-                    <el-button-group>
-                        <el-button
-                            icon="el-icon-setting"
-                            v-if="!showArr.includes(`${index}-${itemIndex}`)"
-                            @click="showConfig(index,itemIndex)"
-                        ></el-button>
-                        <el-button
-                            icon="el-icon-arrow-up"
-                            v-else
-                            @click="hiddenConfig(index,itemIndex)"
-                        ></el-button>
-                        <el-button icon="el-icon-delete" @click="delValue(index,itemIndex)"></el-button>
-                    </el-button-group>
+            <template v-if="!valueArr.includes(index)">
+                <div class="value" v-for="(item,itemIndex) in backList.data" :key="itemIndex">
+                    <div class="value-main">
+                        <el-input class="value-input" v-model="item.input" placeholder="字段名"></el-input>
+                        <el-select
+                            class="value-type"
+                            v-model="item.type"
+                            filterable
+                            allow-create
+                            placeholder="数据类型"
+                        >
+                            <el-option v-for="option in options" :key="option" :value="option"></el-option>
+                        </el-select>
+                        <el-button-group>
+                            <el-button
+                                icon="el-icon-setting"
+                                v-if="!configArr.includes(`${index}-${itemIndex}`)"
+                                @click="showConfig(index,itemIndex)"
+                            ></el-button>
+                            <el-button
+                                icon="el-icon-arrow-up"
+                                v-else
+                                @click="hiddenConfig(index,itemIndex)"
+                            ></el-button>
+                            <el-button icon="el-icon-delete" @click="delValue(index,itemIndex)"></el-button>
+                        </el-button-group>
+                    </div>
+                    <div class="value-config" v-if="configArr.includes(`${index}-${itemIndex}`)">
+                        <el-select v-model="item.need" placeholder="请选择">
+                            <el-option label="必须" value="true"></el-option>
+                            <el-option label="非必须" value="false"></el-option>
+                        </el-select>
+                        <el-input v-model="item.remark" placeholder="备注"></el-input>
+                    </div>
                 </div>
-                <div class="value-config" v-if="showArr.includes(`${index}-${itemIndex}`)">
-                    <el-select v-model="item.need" placeholder="请选择">
-                        <el-option label="必须" value="true"></el-option>
-                        <el-option label="非必须" value="false"></el-option>
-                    </el-select>
-                    <el-input v-model="item.remark" placeholder="备注"></el-input>
-                </div>
-            </div>
-            <el-button
-                class="add-value"
-                icon="el-icon-circle-plus-outline"
-                @click="addValue(index)"
-            >添加字段</el-button>
+                <el-button
+                    class="add-value"
+                    icon="el-icon-circle-plus-outline"
+                    @click="addValue(index)"
+                >添加字段</el-button>
+            </template>
         </div>
         <el-button class="add-value" icon="el-icon-circle-plus" @click="addList">添加结构</el-button>
     </div>
@@ -83,7 +91,8 @@ export default {
                 ]
             },
             backLists: [],
-            showArr: []
+            configArr: [],
+            valueArr: []
         };
     },
     computed: {
@@ -93,7 +102,7 @@ export default {
     },
     watch: {
         backLists: {
-            handler(newValue, oldValue) {
+            handler(newValue) {
                 if (this.backLists[0]) {
                     this.$store.commit("updateBackLists", newValue);
                 }
@@ -101,7 +110,7 @@ export default {
             immediate: true,
             deep: true
         },
-        structureText: function(newValue, oldValue) {
+        structureText: function(newValue) {
             this.backLists = newValue;
         }
     },
@@ -120,11 +129,19 @@ export default {
             this.backLists[index].data.splice(itemIndex, 1);
         },
         showConfig(index, itemIndex) {
-            this.showArr.push(`${index}-${itemIndex}`);
+            this.configArr.push(`${index}-${itemIndex}`);
+        },
+        hiddenValue(index) {
+            this.valueArr.push(index);
         },
         hiddenConfig(index, itemIndex) {
-            this.showArr = this.showArr.filter(item => {
+            this.configArr = this.configArr.filter(item => {
                 return item !== `${index}-${itemIndex}`;
+            });
+        },
+        showValue(index) {
+            this.valueArr = this.valueArr.filter(item => {
+                return item !== index;
             });
         },
         addList() {
