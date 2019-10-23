@@ -1,18 +1,16 @@
 <template>
     <div id="json2structure">
         <div class="tools">
-            <el-button-group class="btn-group">
-                <el-button
-                    size="mini"
-                    icon="el-icon-copy-document"
-                    @click="changeType"
-                >切换输入格式（当前为{{dataType}})</el-button>
-                <template v-if="dataType === 'JSON'">
-                    <el-button size="mini" icon="el-icon-refresh-left" @click="reset">Reset</el-button>
-                    <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
-                </template>
+            <el-select v-model="dataType" placeholder="请选择" @change="changeType">
+                <el-option label="JSON类型" value="JSON"></el-option>
+                <el-option label="GO类型" value="GO"></el-option>
+            </el-select>
+            <el-button-group class="btn-group" v-if="dataType === 'JSON'">
+                <el-button size="mini" icon="el-icon-refresh-left" @click="reset">Reset</el-button>
+                <el-button size="mini" icon="el-icon-finished" @click="align">JSON Align</el-button>
             </el-button-group>
             <el-alert
+                class="alert"
                 :title="`${showWarning?'非':''}标准${dataType}格式`"
                 :type="showWarning?'warning':'success'"
                 :closable="false"
@@ -65,7 +63,6 @@ export default {
                 });
         },
         changeType() {
-            this.dataType = this.dataType === "JSON" ? "GO" : "JSON";
             this.setStructureText(this.text);
         },
         reset() {
@@ -101,9 +98,12 @@ export default {
             display: flex;
             flex-wrap: nowrap;
         }
+        & /deep/ .el-select {
+            min-width: 120px;
+        }
     }
     .jsonInput /deep/ .el-textarea__inner {
-        border: 1px #DCDFE6 solid;
+        border: 1px #dcdfe6 solid;
     }
 }
 </style>

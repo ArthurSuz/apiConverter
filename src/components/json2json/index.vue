@@ -24,11 +24,13 @@
             ></el-alert>
             <div class="change-input">
                 <el-input
+                    ref="focusInput"
                     v-model="selectItemVal"
                     @change="setJsonData"
                     v-if="selectType === '[object String]'"
                 ></el-input>
                 <el-input-number
+                    ref="focusInput"
                     style="width: 100%"
                     v-model="selectItemVal"
                     @change="setJsonData"
@@ -112,13 +114,13 @@ export default {
         }
     },
     watch: {
-        jsonBFC: function(newValue, oldValue) {
+        jsonBFC: function(newValue) {
             this.root = newValue;
             this.selectItemKeys = this.$options.selectItemKeys;
             this.selectItemVal = this.$options.selectItemVal;
             this.selectType = this.$options.selectType;
         },
-        root: function(newValue, oldValue) {
+        root: function(newValue) {
             this.$store.commit("updateJsonAFC", newValue);
         }
     },
@@ -137,15 +139,23 @@ export default {
             this.selectItemKeys = path;
             this.selectItemVal = data;
             this.selectType = Object.prototype.toString.call(data);
+            this.$nextTick(function() {
+                let input = this.$refs.focusInput;
+                if (input) {
+                    input.focus();
+                }
+            });
         },
         setJsonData(val) {
             switch (this.selectType) {
                 case "[object String]":
+                    // eslint-disable-next-line no-case-declarations
                     let valStr = val.replace(/"/g, "'");
                     this.selectItemVal = valStr;
                     eval(`this.${this.selectItemKeys} = valStr`);
                     break;
                 case "[object Number]":
+                    // eslint-disable-next-line no-case-declarations
                     let valNum = val || 0;
                     this.selectItemVal = valNum;
                     eval(`this.${this.selectItemKeys} = ${valNum}`);
@@ -155,6 +165,7 @@ export default {
                     break;
                 case "[object Array]":
                     if (val === "add") {
+                        // eslint-disable-next-line no-unused-vars
                         let newData = JSON.parse(
                             JSON.stringify(this.selectItemVal[0])
                         );

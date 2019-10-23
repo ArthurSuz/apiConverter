@@ -103,46 +103,40 @@ const actions = {
                         if (!e) {
                             return;
                         }
-                        let curArr = e.trim().split(" ").filter(e => e);
-                        // console.log(curArr);
-                        switch (curArr[0]) {
-                            case "type":
-                                goDataArr.push({
-                                    name: curArr[1],
-                                    type:
-                                        /(\S*)struct/.exec(curArr[2])[1] ===
-                                            "[]"
-                                            ? "list"
-                                            : "obj",
-                                    data: []
-                                });
-                                break;
-                            case "}":
-                                lastindex++;
-                                break;
-                            default:
-                                if (
-                                    !Object.keys(config.basisTypes).includes(
-                                        curArr[1]
-                                    )
-                                ) {
-                                    if (curArr[1].includes("[]")) {
-                                        goDataSp[curArr[1].replace("[]", "")] =
-                                            "list";
-                                    } else if (
-                                        !curArr[1].includes("interface{}")
-                                    ) {
-                                        goDataSp[curArr[1]] = "obj";
-                                    }
+                        let arrInt = e.trim().split("`").filter(e => e);
+                        let arrInt_1 = arrInt[0].trim().split(" ").filter(e => e);
+                        let arrInt_2 = arrInt[1] && arrInt[1].trim().split(" ").filter(e => e.includes("json")) || null;
+                        let arrRes = arrInt[1] ? [...arrInt_1, ...arrInt_2] : [...arrInt_1];
+                        let curArr = arrInt[2] ? [...arrRes, arrInt[2].trim()] : arrRes;
+                        if (curArr[0] === "type") {
+                            goDataArr.push({
+                                name: curArr[1],
+                                type:
+                                    /(\S*)struct/.exec(curArr[2])[1] ===
+                                        "[]"
+                                        ? "list"
+                                        : "obj",
+                                data: []
+                            });
+                        } else if (curArr[0] === "}") {
+                            lastindex++;
+                        } else if (curArr[0].includes("//")) {
+                            //跳过注释
+                        } else if (curArr.length >= 2) {
+                            if (!Object.keys(config.basisTypes).includes(curArr[1])) {
+                                if (curArr[1].includes("[]")) {
+                                    goDataSp[curArr[1].replace("[]", "")] = "list";
+                                } else if (!curArr[1].includes("interface{}")) {
+                                    goDataSp[curArr[1]] = "obj";
                                 }
-                                goDataArr[lastindex].data.push({
-                                    input: /`json:"(\S*)"`/.exec(curArr[2])[1],
-                                    need: "true",
-                                    remark: "",
-                                    type: replaceTheBrackets(curArr[1]),
-                                    originalData: { type: replaceTheBrackets(curArr[1]), value: curArr.slice(3).join(" ") }
-                                });
-                                break;
+                            }
+                            if (!(/^[A-Z]/).test(curArr[0])) { return; }//首位非大写字母时跳过
+                            let input = curArr[2] ? /json:"(\S*)"/.exec(curArr[2])[1] : curArr[0].replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+                            goDataArr[lastindex].data.push({
+                                input, need: "true", remark: "",
+                                type: replaceTheBrackets(curArr[1]),
+                                originalData: { type: replaceTheBrackets(curArr[1]), value: curArr.slice(3).join(" ") }
+                            });
                         }
                     });
 
@@ -241,6 +235,7 @@ function findInList(name, faName) {
 }
 
 function replaceTheBrackets(val) {
+    val = val.replace(/\*/g, "");
     return Object.keys(config.basisTypes).includes(val) ? val : val.replace("[]", "");
 }
 
