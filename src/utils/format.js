@@ -368,7 +368,7 @@ export function jsonToGo(json, typename, flatten = true, dataShow = false) {
     function typeTransform(data) {
         switch (typeof data) {
             case "string":
-                return `"${data.replace(/"/g, "'")}"`;
+                return `"${data.replace(/"/g, "'").replace(/\s/g,"")}"`;
             case "number":
                 return data;
             case "boolean":
